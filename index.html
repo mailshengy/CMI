@@ -7,10 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
   :root{
-    --card-w: 450px;
+    --card-w: 400px;
     --card-h: 600px;
-    --front-img-size: 410px;
-    --front-top: 20px;
+    --front-img-size: 376px;
+    --front-top: 12px;
     --paper: #ffffff;
     --offwhite-bg: #F8F8F6;
     --edge: rgba(0,0,0,.08);
@@ -97,7 +97,7 @@
     width:var(--front-img-size);height:var(--front-img-size);
     border-radius:12px;background:transparent;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
-    display:grid;place-items:center;color:#333;font-size:14px;text-align:center;padding:10px;
+    display:grid;place-items:center;color:#333;font-size:12px;text-align:center;padding:0px;
   }
 
   .ctrl{
@@ -131,10 +131,10 @@
 
     <div class="controls">
       <button class="ctrl" id="ctrl" aria-pressed="true">
-        <span class="sr-only">Tap to start or stop. Hold to reset.</span>
+        <span class="sr-only">Hold to reset.</span>
         <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         <svg id="icon-play"  viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M8 5v14l11-7z"/></svg>
-        <span class="label">tap to start/stop • hold to reset</span>
+        <span class="label">Hold to reset</span>
       </button>
     </div>
   </div>
