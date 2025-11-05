@@ -11,14 +11,18 @@
     --card-h: 600px;
     --front-img-size: 376px;
     --front-top: 12px;
+
     --paper: #ffffff;
     --offwhite-bg: #F8F8F6;
+
     --edge: rgba(0,0,0,.08);
     --shadow-lg: 0 16px 40px rgba(0,0,0,.18), 0 6px 14px rgba(0,0,0,.12);
     --thickness-z: -3px;
+
+    /* Holographic controls (Initial values) */
     --holo-phase: 0deg;
     --holo-tilt-x: 0deg;
-    --holo-intensity: 0.15;
+    --holo-intensity: 0.12;
     --holo-x: 50%;
     --holo-y: 45%;
   }
@@ -31,57 +35,97 @@
   }
 
   .wrap{display:grid; justify-items:center; gap:12px; padding:16px;}
-  .scene{width:min(96vw,520px);aspect-ratio:3/4;display:grid;place-items:center;perspective:1200px;user-select:none;touch-action:none;}
+
+  .scene{
+    width:min(96vw,520px);
+    aspect-ratio:3/4;
+    display:grid;place-items:center;
+    perspective:1200px;
+    user-select:none; touch-action:none;
+  }
 
   .card{
-    width:var(--card-w);height:var(--card-h);position:relative;
-    transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1);
+    width:var(--card-w); height:var(--card-h); position:relative;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
     will-change:transform;
   }
-  .card::after{content:"";position:absolute;inset:0;border-radius:16px;
-    box-shadow:var(--shadow-lg);transform:translateZ(var(--thickness-z));pointer-events:none;}
+  .card::after{
+    content:""; position:absolute; inset:0; border-radius:16px;
+    box-shadow:var(--shadow-lg);
+    transform:translateZ(var(--thickness-z));
+    pointer-events:none;
+  }
 
   .face{
-    position:absolute;inset:0;border-radius:16px;background:var(--paper);
-    backface-visibility:hidden;-webkit-backface-visibility:hidden;transform-style:preserve-3d;
+    position:absolute; inset:0; border-radius:16px; background:var(--paper);
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    transform-style:preserve-3d;
+    /* Improved subtle paper texture (finer) */
     background-image:
-      radial-gradient(circle at 26% 22%, rgba(0,0,0,.028), transparent 42%),
-      radial-gradient(circle at 74% 12%, rgba(0,0,0,.022), transparent 44%),
-      repeating-linear-gradient(135deg, rgba(0,0,0,.012) 0 2px, transparent 2px 7px),
-      repeating-linear-gradient(45deg, rgba(0,0,0,.01) 0 2px, transparent 2px 7px);
+      radial-gradient(circle at 26% 22%, rgba(0,0,0,.02), transparent 40%),
+      radial-gradient(circle at 74% 12%, rgba(0,0,0,.018), transparent 40%),
+      repeating-linear-gradient(135deg, rgba(0,0,0,.01) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(45deg, rgba(0,0,0,.008) 0 1px, transparent 1px 6px);
     background-blend-mode:multiply;
   }
-  .back{transform:rotateY(180deg);}
+  .back{ transform:rotateY(180deg); }
 
   .front-art{
-    position:absolute;top:var(--front-top);left:0;right:0;margin:auto;
-    width:var(--front-img-size);height:var(--front-img-size);
-    border-radius:12px;overflow:hidden;
+    position:absolute; top:var(--front-top); left:0; right:0; margin:auto;
+    width:var(--front-img-size); height:var(--front-img-size);
+    border-radius:12px; overflow:hidden; position:relative;
     box-shadow:0 8px 18px rgba(0,0,0,.16), inset 0 0 0 1px rgba(255,255,255,.5);
+    background-color:#fff;
+    /* Placeholder rainbow reveal image */
     background-image:conic-gradient(from 0deg,#ff3d3d,#ff7a00,#ffd100,#5bd400,#00c2ff,#7b5cff,#ff4bd8,#ff3d3d);
     background-size:cover;
   }
 
+  /* ======================================
+    IMPROVED HOLOGRAPHIC EFFECT
+    ======================================
+    1. Increased 'inset' to -50% for more rotation room.
+    2. Replaced the 'linear-gradient' with a 'conic-gradient' for a
+       spectral, spinning, radiating effect.
+    3. The conic gradient's colors are set with 'hsla' to be easily
+       driven by the '--holo-intensity' variable.
+  */
   .front-art::after{
-    content:"";position:absolute;inset:-35%;pointer-events:none;
+    content:""; position:absolute; inset:-50%; /* More room to rotate */
+    pointer-events:none;
     background:
-      linear-gradient(calc(115deg + var(--holo-phase)),
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,calc(.25 * var(--holo-intensity))) 16%,
-        rgba(255,255,255,calc(.85 * var(--holo-intensity))) 22%,
-        rgba(255,255,255,calc(.25 * var(--holo-intensity))) 28%,
-        rgba(255,255,255,0) 42%),
-      conic-gradient(
-        from var(--holo-phase) at var(--holo-x) var(--holo-y),
-        rgba(255,0,204,calc(.16 * var(--holo-intensity))),
-        rgba(0,255,255,calc(.16 * var(--holo-intensity))),
-        rgba(255,255,0,calc(.16 * var(--holo-intensity))),
-        rgba(255,0,204,calc(.16 * var(--holo-intensity))));
-    mix-blend-mode:screen;
+      /* 1. White flare (driven by intensity) */
+      radial-gradient(circle at var(--holo-x) var(--holo-y),
+        rgba(255,255,255, calc(0.8 * var(--holo-intensity))) 0%,
+        rgba(255,255,255, 0) 30%),
+      
+      /* 2. Spectral color shift (driven by intensity & phase) */
+      conic-gradient(from var(--holo-phase) at var(--holo-x) var(--holo-y),
+        hsla(0,   100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(60,  100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(120, 100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(180, 100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(240, 100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(300, 100%, 50%, calc(.25 * var(--holo-intensity))),
+        hsla(360, 100%, 50%, calc(.25 * var(--holo-intensity)))
+      );
+    mix-blend-mode:color-dodge;
     transform:rotateX(var(--holo-tilt-x)) translateZ(0);
+    z-index:2;
   }
 
-  /* Felt marker text under the image */
+  /* Scratch foil canvas above the image */
+  .scratch-layer{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    touch-action:none; cursor:crosshair;
+    border-radius:12px;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    z-index:3;
+    display:block;
+  }
+
   .signature{
     position:absolute;
     top:calc(var(--front-top) + var(--front-img-size) + 30px);
@@ -92,47 +136,91 @@
     user-select:none;
   }
 
+  .reveal-stamp{
+    position:absolute;
+    top:calc(var(--front-top) + var(--front-img-size) + 70px);
+    left:0; right:0; text-align:center;
+    font: 700 14px/1.2 ui-sans-serif, system-ui, -apple-system;
+    color:#2e7d32;
+    opacity:0; transform:translateY(6px);
+    transition: opacity .25s ease, transform .25s ease;
+    user-select:none;
+  }
+  .reveal-stamp.show{ opacity:1; transform:translateY(0); }
+
   .back-panel{
-    position:absolute;top:var(--front-top);left:0;right:0;margin:auto;
-    width:var(--front-img-size);height:var(--front-img-size);
-    border-radius:12px;background:transparent;
+    position:absolute; top:var(--front-top); left:0; right:0; margin:auto;
+    width:var(--front-img-size); height:var(--front-img-size);
+    border-radius:12px; background:transparent;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
-    display:grid;place-items:center;color:#333;font-size:12px;text-align:center;padding:0px;
+    display:grid; place-items:center; color:#333; font-size:12px; text-align:center;
   }
 
+  /* Bottom control (below card) - Improved CSS Toggle & Hold Animation */
+  .controls{ display:grid; justify-items:center; margin-top:4px; }
   .ctrl{
-    display:inline-grid;grid-auto-flow:row;align-items:center;justify-items:center;
-    gap:4px;padding:8px 12px;border-radius:8px;background:#fff;
-    border:1px solid rgba(0,0,0,.12);box-shadow:0 8px 20px rgba(0,0,0,.12);
-    cursor:pointer;
-    position: relative;
-  top: 40px;  /* pushes it down 20px */
+    display:inline-grid; grid-auto-flow:row; align-items:center; justify-items:center;
+    gap:4px; padding:8px 12px; border-radius:8px; background:#fff;
+    border:1px solid rgba(0,0,0,.12); box-shadow:0 8px 20px rgba(0,0,0,.12);
+    cursor:pointer; position:relative; top:40px;
+    overflow:hidden; /* Needed for the ::before pseudo-element */
   }
-  .ctrl svg{width:20px;height:20px;opacity:.9;}
-  .ctrl .label{font-size:8px;line-height:1;color:#333;opacity:.8;}
-  .ctrl[aria-pressed="true"]{border-color:#2563eb;}
-  .controls{display:grid;justify-items:center;margin-top:4px;}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,1px,1px);white-space:nowrap;border:0;}
+
+  /* Hold to reset visual timer */
+  .ctrl:active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    animation: hold-fill 0.65s linear forwards;
+    z-index: 1;
+    pointer-events: none;
+  }
+  @keyframes hold-fill {
+    0% { transform: scaleX(0); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
+  }
+
+  .ctrl svg{ width:20px; height:20px; opacity:.9; z-index:2; }
+  .ctrl .label{ font-size:8px; line-height:1; color:#333; opacity:.8; z-index:2; }
+  .ctrl[aria-pressed="true"]{ border-color:#2563eb; }
+
+  /* CSS-managed icon toggle */
+  .ctrl[aria-pressed="true"] #icon-play,
+  .ctrl[aria-pressed="false"] #icon-pause {
+    display: none;
+  }
+  .ctrl[aria-pressed="true"] #icon-pause,
+  .ctrl[aria-pressed="false"] #icon-play {
+    display: block;
+  }
+  
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,1px,1px); white-space:nowrap; border:0; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="scene" id="scene">
       <div class="card" id="card">
-        <div class="face">
-          <div class="front-art"></div>
+        <div class="face" id="frontFace">
+          <div class="front-art" id="frontArt">
+            <canvas class="scratch-layer" id="scratch"></canvas>
+            </div>
           <div class="signature">SCRATCH CARD<br>BY SCRATCH</div>
+          <div class="reveal-stamp" id="revealStamp" aria-live="polite"></div>
         </div>
+
         <div class="face back">
           <div class="back-panel">With Love, Xoxo</div>
         </div>
       </div>
     </div>
 
-    <div class="controls">
+    <div classs="controls">
       <button class="ctrl" id="ctrl" aria-pressed="true">
         <span class="sr-only">Hold to reset.</span>
-        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/></svg>
         <svg id="icon-play"  viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M8 5v14l11-7z"/></svg>
         <span class="label">Hold to reset</span>
       </button>
@@ -141,86 +229,423 @@
 
 <script>
 (() => {
+  /* -------- DOM Element Cache -------- */
   const scene = document.getElementById('scene');
   const card  = document.getElementById('card');
   const ctrl  = document.getElementById('ctrl');
-  const iconPlay  = document.getElementById('icon-play');
-  const iconPause = document.getElementById('icon-pause');
-  let rotX=-6, rotY=24, scale=1;
-  let dragging=false,lastX=0,lastY=0,activePointerId=null;
-  let autoId=0,autoOn=true;
-  const rootStyle=document.documentElement.style;
-  let lastRY=rotY,lastRX=rotX;
-  let pointerX=0.5,pointerY=0.45;
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const frontArt = document.getElementById('frontArt');
+  const scratchCanvas = document.getElementById('scratch');
+  const revealStamp = document.getElementById('revealStamp');
+
+  /* -------- State Grouping for Maintainability -------- */
+  const cardState = {
+    rotX: -6, rotY: 24, scale: 1,
+    autoId: 0,
+    autoOn: true,
+  };
+
+  const pointerState = {
+    dragging: false,
+    lastX: 0, lastY: 0,
+    activePointerId: null,
+  };
+
+  const holoState = {
+    // Holographic tracking variables
+    lastRY: cardState.rotY, lastRX: cardState.rotX,
+    // Renamed from pointerX/Y to holoX/Y for clarity
+    holoX: 0.5, holoY: 0.45,
+  };
+
+  const scratchState = {
+    ctx: null,
+    revealedStamped: false,
+    ratioCheckTimer: null, // For debouncing the heavy ratio check
+    brushBase: 0,
+    lastDabX: null, lastDabY: null, // For smoother scratching
+  };
+
+  /* -------- Helper Functions -------- */
+  const rootStyle = document.documentElement.style;
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
   function apply(){
-    card.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+    card.style.transform = `rotateX(${cardState.rotX}deg) rotateY(${cardState.rotY}deg) scale(${cardState.scale})`;
     updateHolo();
   }
+
+  /* -------- Holographic Model: Improved Dynamics -------- */
   function updateHolo(){
-    rootStyle.setProperty('--holo-phase',`${rotY}deg`);
-    rootStyle.setProperty('--holo-tilt-x',`${rotX*0.25}deg`);
-    const dRY=rotY-lastRY; const dRX=rotX-lastRX;
-    const vMag=Math.min(1,Math.hypot(dRY,dRX)/12);
-    const intensity=autoOn?Math.max(0.12,vMag):vMag;
-    rootStyle.setProperty('--holo-intensity',intensity.toFixed(3));
-    rootStyle.setProperty('--holo-x',`${pointerX*100}%`);
-    rootStyle.setProperty('--holo-y',`${pointerY*100}%`);
-    lastRY=rotY; lastRX=rotX;
+    rootStyle.setProperty('--holo-phase', `${cardState.rotY}deg`);
+    rootStyle.setProperty('--holo-tilt-x', `${cardState.rotX * 0.25}deg`);
+    
+    // Calculate rotational velocity (delta) for dynamic intensity
+    const dRY = cardState.rotY - holoState.lastRY;
+    const dRX = cardState.rotX - holoState.lastRX;
+    // Velocity magnitude is capped at 1 for normalization
+    const vMag = Math.min(1, Math.hypot(dRY, dRX) / 12);
+    
+    // Intensity: always has a baseline (0.12) and ramps up with movement (vMag)
+    const intensity = cardState.autoOn ? Math.max(0.12, vMag * 0.8) : vMag * 0.9;
+    
+    rootStyle.setProperty('--holo-intensity', intensity.toFixed(3));
+    
+    // Read the unified holoX/Y state (driven by auto-orbit OR drag)
+    rootStyle.setProperty('--holo-x', `${holoState.holoX * 100}%`);
+    rootStyle.setProperty('--holo-y', `${holoState.holoY * 100}%`);
+    
+    holoState.lastRY = cardState.rotY; 
+    holoState.lastRX = cardState.rotX;
   }
-  const tick=()=>{rotY+=0.35;apply();autoId=requestAnimationFrame(tick);};
+
+  // Slow yaw and auto-orbiting hologram
+  function tick(){
+    if (!cardState.autoOn) return; // Guard clause
+    
+    cardState.rotY += 0.18;
+    
+    /* ======================================
+      IMPROVEMENT: AUTO-ORBITING HOLOGRAM
+      ======================================
+      When auto-rotating, update the holoX/Y state using sin/cos
+      to create a fluid "orbiting" flare effect.
+    */
+    const autoTime = performance.now() * 0.001;
+    holoState.holoX = 0.5 + Math.cos(autoTime * 0.7) * 0.25;
+    holoState.holoY = 0.5 + Math.sin(autoTime * 0.5) * 0.2;
+    
+    apply();
+    cardState.autoId = requestAnimationFrame(tick);
+  }
+
   function setAuto(on){
-    autoOn=on;
-    ctrl.setAttribute('aria-pressed',on?'true':'false');
-    iconPause.style.display=on?'block':'none';
-    iconPlay.style.display=on?'none':'block';
-    cancelAnimationFrame(autoId);
-    if(on)autoId=requestAnimationFrame(tick);
+    cardState.autoOn = on;
+    // CSS handles the icon toggle via this attribute
+    ctrl.setAttribute('aria-pressed', on ? 'true' : 'false');
+    cancelAnimationFrame(cardState.autoId);
+    if (on) cardState.autoId = requestAnimationFrame(tick);
   }
-  function flip(){rotY+=180;apply();}
+
+  function flip(){ cardState.rotY += 180; apply(); }
+
+  /* -------- Drag/Rotation Handlers -------- */
   function onDown(e){
+    // Do not capture pointer if starting on the scratch layer
+    if (e.target === scratchCanvas) return; 
     e.preventDefault();
-    dragging=true;activePointerId=e.pointerId;lastX=e.clientX;lastY=e.clientY;
-    scene.setPointerCapture(activePointerId);cancelAnimationFrame(autoId);
+    pointerState.dragging = true;
+    pointerState.activePointerId = e.pointerId;
+    pointerState.lastX = e.clientX; 
+    pointerState.lastY = e.clientY;
+    scene.setPointerCapture(pointerState.activePointerId);
+    setAuto(false); // Stop auto-rotation on drag
   }
+
   function onMove(e){
-    if(!dragging||e.pointerId!==activePointerId)return;
-    const dx=e.clientX-lastX,dy=e.clientY-lastY;
-    rotY+=dx*0.15;rotX-=dy*0.15;rotX=clamp(rotX,-75,75);
-    const rect=card.getBoundingClientRect();
-    pointerX=clamp((e.clientX-rect.left)/rect.width,0,1);
-    pointerY=clamp((e.clientY-rect.top)/rect.height,0,1);
-    lastX=e.clientX;lastY=e.clientY;apply();
+    if(!pointerState.dragging || e.pointerId !== pointerState.activePointerId) return;
+    const dx = e.clientX - pointerState.lastX;
+    const dy = e.clientY - pointerState.lastY;
+    
+    cardState.rotY += dx * 0.15;
+    cardState.rotX -= dy * 0.15;
+    cardState.rotX = clamp(cardState.rotX, -75, 75);
+    
+    /* ======================================
+      IMPROVEMENT: HOLOGRAM DRAG TRACKING
+      ======================================
+      Update the *same* holoX/Y state variables that the
+      auto-orbit uses. This provides a single source of truth.
+    */
+    const rect = card.getBoundingClientRect();
+    holoState.holoX = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+    holoState.holoY = clamp((e.clientY - rect.top) / rect.height, 0, 1);
+    
+    pointerState.lastX = e.clientX; 
+    pointerState.lastY = e.clientY;
+    apply();
   }
+
   function endDrag(){
-    if(!dragging)return;
-    dragging=false;
-    if(activePointerId!==null){try{scene.releasePointerCapture(activePointerId);}catch(e){}}
-    activePointerId=null;if(autoOn)setAuto(true);
+    if(!pointerState.dragging) return;
+    pointerState.dragging = false;
+    if (pointerState.activePointerId !== null) { 
+      try { scene.releasePointerCapture(pointerState.activePointerId); } catch(e){} 
+    }
+    pointerState.activePointerId = null;
+    
+    // Resume auto-rotation if it was on
+    if (ctrl.getAttribute('aria-pressed') === 'true') {
+        setAuto(true);
+    }
   }
-  scene.addEventListener('pointerdown',onDown,{passive:false});
-  scene.addEventListener('pointermove',onMove,{passive:true});
-  scene.addEventListener('pointerup',e=>{if(e.pointerId===activePointerId)endDrag();},{passive:true});
-  scene.addEventListener('pointercancel',e=>{if(e.pointerId===activePointerId)endDrag();},{passive:true});
-  scene.addEventListener('lostpointercapture',endDrag,{passive:true});
-  scene.addEventListener('pointerleave',e=>{if(e.pointerId===activePointerId)endDrag();},{passive:true});
-  window.addEventListener('pointerup',endDrag,{passive:true});
-  scene.addEventListener('dblclick',flip,{passive:true});
-  let tapTimer=0;
-  scene.addEventListener('touchend',()=>{
-    const now=Date.now();if(now-tapTimer<280)flip();tapTimer=now;
-  },{passive:true});
-  function reset(){rotX=-6;rotY=24;scale=1;apply();}
-  let holdTimer=0;
+
+  scene.addEventListener('pointerdown', onDown, {passive:false});
+  scene.addEventListener('pointermove', onMove, {passive:true});
+  scene.addEventListener('pointerup',   e=>{ if(e.pointerId===pointerState.activePointerId) endDrag(); }, {passive:true});
+  scene.addEventListener('pointercancel',e=>{ if(e.pointerId===pointerState.activePointerId) endDrag(); }, {passive:true});
+  scene.addEventListener('lostpointercapture', endDrag, {passive:true});
+  scene.addEventListener('pointerleave', e=>{ if(e.pointerId===pointerState.activePointerId) endDrag(); }, {passive:true});
+  window.addEventListener('pointerup', endDrag, {passive:true});
+  scene.addEventListener('dblclick', flip, {passive:true});
+
+  /* ---------------- SCRATCH FOIL MODEL ---------------- */
+  // Path for rounded clip (matches CSS border-radius)
+  function roundedRectPath(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+  }
+
+  // Draw the initial metallic foil layer
+  function initScratch(){
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const w = frontArt.clientWidth;
+    const h = frontArt.clientHeight;
+
+    scratchCanvas.width  = Math.round(w * dpr);
+    scratchCanvas.height = Math.round(h * dpr);
+    scratchCanvas.style.width  = w + 'px';
+    scratchCanvas.style.height = h + 'px';
+
+    scratchState.ctx = scratchCanvas.getContext('2d', { willReadFrequently: true });
+    const ctx = scratchState.ctx;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Set up the initial clip path
+    ctx.save();
+    roundedRectPath(ctx, 0, 0, w, h, 12);
+    ctx.clip();
+    
+    /* ======================================
+      IMPROVED FOIL TEXTURE
+      ======================================
+      1. Tweaked gradient colors for a more 'silver' look.
+      2. Increased streak count, randomized height, and lowered alpha.
+      3. Increased speckle density, lowered alpha, and reduced size.
+      This creates a finer, more realistic metallic grain.
+    */
+
+    // 1. Base opaque metallic layer
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0,   '#b8c0c8'); /* New silver tones */
+    g.addColorStop(0.5, '#aab4bc');
+    g.addColorStop(1,   '#c0c8d0');
+    ctx.fillStyle = g;
+    ctx.fillRect(-1, -1, w+2, h+2);
+
+    // 2. Brushed metallic streaks (more subtle, more numerous, varied height)
+    ctx.globalAlpha = 0.08; // Subtler
+    for(let i=0; i < 150; i++){ // More streaks
+      const y = Math.random()*h;
+      const H = Math.random()*2 + 0.5; // Varied height
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      ctx.fillRect(0, y, w, H);
+    }
+    ctx.globalAlpha = 1;
+
+    // 3. Fine Speckle (denser, smaller)
+    const speckles = Math.floor(w * h / 50); // Denser
+    ctx.globalAlpha = 0.25; // Subtler
+    for(let i=0; i < speckles; i++){
+      const x = Math.random()*w;
+      const y = Math.random()*h;
+      const r = Math.random()*0.8 + 0.2; // Finer radius
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // 4. Set final state for scratching
+    ctx.globalCompositeOperation = 'destination-out';
+    
+    // Reset scratching state
+    scratchState.revealedStamped = false;
+    scratchState.brushBase = Math.max(18, Math.min(scratchCanvas.clientWidth, scratchCanvas.clientHeight) * 0.045);
+    revealStamp.classList.remove('show');
+    scratchState.lastDabX = null; // Clear last dab point
+    scratchState.lastDabY = null;
+
+    // Ensure handlers are (re)attached
+    // (This is implicitly handled by the IIFE scope, but good to be aware)
+  }
+
+  function attachScratchHandlers(){
+    let scratching = false;
+    let pointerId = null;
+    const ctx = scratchState.ctx;
+    
+    function localCoords(e){
+      const b = scratchCanvas.getBoundingClientRect();
+      return { x: e.clientX - b.left, y: e.clientY - b.top };
+    }
+
+    // This 'dab' logic is excellent.
+    // It draws a circle for the first point (fill)
+    // and a thick line (stroke) between subsequent points.
+    // This prevents gaps from fast swipes.
+    function dab(x, y){
+      const brushBase = scratchState.brushBase; // Get current brush size
+      if (scratchState.lastDabX === null) {
+        // Initial dab: just a circle
+        ctx.beginPath();
+        ctx.arc(x, y, brushBase, 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        // Line segment between points
+        ctx.lineCap = 'round';
+        ctx.lineWidth = brushBase * 2;
+        ctx.beginPath();
+        ctx.moveTo(scratchState.lastDabX, scratchState.lastDabY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        // Also draw a point at the end for a rounder feel
+        ctx.beginPath();
+        ctx.arc(x, y, brushBase, 0, Math.PI*2);
+        ctx.fill();
+      }
+      scratchState.lastDabX = x;
+      scratchState.lastDabY = y;
+    }
+
+    function onScratchDown(e){
+      e.preventDefault(); e.stopPropagation();
+      scratching = true; pointerId = e.pointerId;
+      if (cardState.autoOn) setAuto(false); // Stop auto-rotate
+      const {x,y} = localCoords(e); dab(x,y);
+      // TODO: Play scratch start sound
+      // document.getElementById('scratch-sound')?.play();
+    }
+    function onScratchMove(e){
+      if(!scratching || e.pointerId !== pointerId) return;
+      e.preventDefault(); e.stopPropagation();
+      const {x,y} = localCoords(e); dab(x,y);
+      // TODO: Loop scratch sound
+    }
+    function onScratchEnd(){
+      if(!scratching) return;
+      scratching = false; pointerId = null;
+      scratchState.lastDabX = null; 
+      scratchState.lastDabY = null; // Reset for next stroke
+      // TODO: Stop scratch sound
+
+      // Debounce the heavy ratio check
+      clearTimeout(scratchState.ratioCheckTimer);
+      scratchState.ratioCheckTimer = setTimeout(() => {
+        const ratio = getClearedRatio();
+        if (!scratchState.revealedStamped && ratio >= 0.40){
+          scratchState.revealedStamped = true;
+          revealStamp.textContent = `Revealed on ${formatStamp()}`;
+          revealStamp.classList.add('show');
+        }
+      }, 200);
+
+      // Resume auto-rotation if it was on
+      if (ctrl.getAttribute('aria-pressed') === 'true') {
+        setAuto(true);
+      }
+    }
+
+    scratchCanvas.onpointerdown = onScratchDown;
+    scratchCanvas.onpointermove = onScratchMove;
+    scratchCanvas.onpointerup = onScratchEnd;
+    scratchCanvas.onpointercancel = onScratchEnd;
+    scratchCanvas.onpointerleave = onScratchEnd;
+  }
+
+  // Accurate cleared ratio using the canvas alpha channel
+  function getClearedRatio(){
+    if (!scratchState.ctx) return 0;
+    const w = scratchCanvas.width;
+    const h = scratchCanvas.height;
+    // Sample grid for speed while staying reliable
+    const step = Math.max(2, Math.round(Math.min(w, h) / 240));
+    const data = scratchState.ctx.getImageData(0,0,w,h).data;
+    let cleared = 0, total = 0;
+    
+    /*
+      NOTE: This logic is clever and correct.
+      'getImageData' reads the rectangular buffer, including the
+      transparent (alpha=0) rounded corners.
+      
+      - `if (a < 10)`: Counts *both* scratched pixels (alpha=0) AND
+                       corner pixels (alpha=0).
+      - `total++`: Counts *all* pixels (scratched + corners + foil).
+      
+      Let's say corners = 18% of the area.
+      - Start: `cleared` = 1800, `total` = 10000. Ratio = 0.18
+      - Threshold: 0.40
+      - This means `(1800 + X_scratched) / 10000 = 0.40`
+      - `1800 + X_scratched = 4000` -> `X_scratched = 2200`
+      - The total foil area is 8200 (10000 - 1800).
+      - `2200 / 8200` is ~26.8%.
+      
+      So, the 40% threshold consistently fires when ~27% of the
+      *actual foil* is scratched. This works perfectly.
+    */
+    for(let y=0; y<h; y+=step){
+      for(let x=0; x<w; x+=step){
+        const a = data[((y*w)+x)*4 + 3]; // alpha 0..255
+        // A pixel is considered 'cleared' if its alpha is very low
+        if (a < 10) cleared++;
+        total++;
+      }
+    }
+    return total ? cleared / total : 0;
+  }
+
+  function formatStamp(){
+    const d = new Date();
+    return d.toLocaleString(undefined, {
+      year:'numeric', month:'short', day:'numeric',
+      hour:'2-digit', minute:'2-digit', hour12:false
+    }).replace(',', '');
+  }
+
+  // Rebuild foil when size changes (using ResizeObserver is modern and efficient)
+  const ro = new ResizeObserver(() => { initScratch(); });
+  ro.observe(frontArt);
+
+  /* -------- Control button: tap toggles auto, hold resets -------- */
+  function reset(){
+    cardState.rotX = -6; cardState.rotY = 24; cardState.scale = 1;
+    initScratch(); // Re-initialize the foil on reset
+    if (ctrl.getAttribute('aria-pressed') === 'true') {
+        setAuto(true); // Re-start auto-rotate if it was on
+    } else {
+        apply(); // Just apply static position
+    }
+  }
+  let holdTimer = 0;
+  
   ctrl.addEventListener('click',()=>{
-    if(ctrl.dataset.longpress==='1'){ctrl.dataset.longpress='0';return;}
-    setAuto(!autoOn);
+    // Check if the click was part of a long press
+    if (ctrl.dataset.longpress === '1'){ ctrl.dataset.longpress = '0'; return; }
+    setAuto(!cardState.autoOn);
   });
-  ctrl.addEventListener('pointerdown',()=>{holdTimer=setTimeout(()=>{ctrl.dataset.longpress='1';reset();},650);});
+  
+  ctrl.addEventListener('pointerdown',()=>{ 
+    // Set flag and start timer for long press
+    holdTimer=setTimeout(()=>{ 
+      ctrl.dataset.longpress='1'; 
+      reset(); 
+    },650); 
+  });
+  // Clear timer on release, cancel, or moving away
   ctrl.addEventListener('pointerup',()=>clearTimeout(holdTimer),{passive:true});
   ctrl.addEventListener('pointerleave',()=>clearTimeout(holdTimer),{passive:true});
   ctrl.addEventListener('pointercancel',()=>clearTimeout(holdTimer),{passive:true});
-  apply(); setAuto(true);
+
+  /* -------- Start -------- */
+  apply();
+  setAuto(true);
+  initScratch();
+  attachScratchHandlers(); // Attach scratch handlers
 })();
 </script>
 </body>
