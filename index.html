@@ -61,7 +61,6 @@
     position:absolute; inset:0; border-radius:16px; background:var(--paper);
     backface-visibility:hidden; -webkit-backface-visibility:hidden;
     transform-style:preserve-3d;
-    /* Improved subtle paper texture (finer) */
     background-image:
       radial-gradient(circle at 26% 22%, rgba(0,0,0,.02), transparent 40%),
       radial-gradient(circle at 74% 12%, rgba(0,0,0,.018), transparent 40%),
@@ -77,21 +76,17 @@
     border-radius:12px; overflow:hidden; position:relative;
     box-shadow:0 8px 18px rgba(0,0,0,.16), inset 0 0 0 1px rgba(255,255,255,.5);
     background-color:#fff;
-    /* Placeholder rainbow reveal image */
     background-image:conic-gradient(from 0deg,#ff3d3d,#ff7a00,#ffd100,#5bd400,#00c2ff,#7b5cff,#ff4bd8,#ff3d3d);
     background-size:cover;
   }
 
   .front-art::after{
-    content:""; position:absolute; inset:-50%; /* More room to rotate */
+    content:""; position:absolute; inset:-50%;
     pointer-events:none;
     background:
-      /* 1. White flare (driven by intensity) */
       radial-gradient(circle at var(--holo-x) var(--holo-y),
         rgba(255,255,255, calc(0.8 * var(--holo-intensity))) 0%,
         rgba(255,255,255, 0) 30%),
-      
-      /* 2. Spectral color shift (driven by intensity & phase) */
       conic-gradient(from var(--holo-phase) at var(--holo-x) var(--holo-y),
         hsla(0,   100%, 50%, calc(.25 * var(--holo-intensity))),
         hsla(60,  100%, 50%, calc(.25 * var(--holo-intensity))),
@@ -106,7 +101,10 @@
     z-index:2;
   }
 
-  /* Scratch foil canvas above the image */
+  /* ======================================
+    SCRATCH FOIL AUTO-CLEAR
+    ======================================
+  */
   .scratch-layer{
     position:absolute; inset:0;
     width:100%; height:100%;
@@ -115,6 +113,14 @@
     backface-visibility:hidden; -webkit-backface-visibility:hidden;
     z-index:3;
     display:block;
+    /* ADDED: Transition for the fade-out */
+    transition: opacity 0.5s ease-out;
+  }
+  
+  /* ADDED: This new rule fades the canvas */
+  .scratch-layer.cleared {
+    opacity: 0;
+    pointer-events: none; /* Disables scratching after reveal */
   }
 
   .signature{
@@ -127,16 +133,10 @@
     user-select:none;
   }
 
-  /* ======================================
-    UPDATED REVEAL STAMP STYLES
-    ======================================
-  */
   .reveal-stamp{
     position:absolute;
-    /* Moved from top to bottom */
     bottom: 30px; 
     left:0; right:0; text-align:center;
-    /* Updated font: 500 weight, 12px size, new grey color */
     font: 500 12px/1.2 ui-sans-serif, system-ui, -apple-system;
     color: #777;
     opacity:0; transform:translateY(6px);
@@ -153,17 +153,15 @@
     display:grid; place-items:center; color:#333; font-size:12px; text-align:center;
   }
 
-  /* Bottom control (below card) - Improved CSS Toggle & Hold Animation */
   .controls{ display:grid; justify-items:center; margin-top:4px; }
   .ctrl{
     display:inline-grid; grid-auto-flow:row; align-items:center; justify-items:center;
     gap:4px; padding:8px 12px; border-radius:8px; background:#fff;
     border:1px solid rgba(0,0,0,.12); box-shadow:0 8px 20px rgba(0,0,0,.12);
     cursor:pointer; position:relative; top:40px;
-    overflow:hidden; /* Needed for the ::before pseudo-element */
+    overflow:hidden;
   }
 
-  /* Hold to reset visual timer */
   .ctrl:active::before {
     content: '';
     position: absolute;
@@ -183,7 +181,6 @@
   .ctrl .label{ font-size:8px; line-height:1; color:#333; opacity:.8; z-index:2; }
   .ctrl[aria-pressed="true"]{ border-color:#2563eb; }
 
-  /* CSS-managed icon toggle */
   .ctrl[aria-pressed="true"] #icon-play,
   .ctrl[aria-pressed="false"] #icon-pause {
     display: none;
@@ -217,7 +214,10 @@
     <div class="controls">
       <button class="ctrl" id="ctrl" aria-pressed="true">
         <span class="sr-only">Hold to reset.</span>
-        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16"/>
+          <rect x="14" y="4" width="4" height="16"/>
+        </svg>
         <svg id="icon-play"  viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         <span class="label">Hold to reset</span>
       </button>
@@ -429,6 +429,12 @@
     scratchState.revealedStamped = false;
     scratchState.brushBase = Math.max(18, Math.min(scratchCanvas.clientWidth, scratchCanvas.clientHeight) * 0.045);
     revealStamp.classList.remove('show');
+    
+    /* ======================================
+      RESET AUTO-CLEAR CLASS
+      ======================================
+    */
+    scratchCanvas.classList.remove('cleared'); // Reset the fade-out class
     scratchState.lastDabX = null;
     scratchState.lastDabY = null;
   }
@@ -482,12 +488,21 @@
       scratchState.lastDabY = null;
 
       clearTimeout(scratchState.ratioCheckTimer);
+      /* ======================================
+        AUTO-CLEAR LOGIC
+        ======================================
+      */
       scratchState.ratioCheckTimer = setTimeout(() => {
         const ratio = getClearedRatio();
-        if (!scratchState.revealedStamped && ratio >= 0.40){
+        
+        // UPDATED: Threshold changed from 0.40 to 0.50
+        if (!scratchState.revealedStamped && ratio >= 0.50){
           scratchState.revealedStamped = true;
           revealStamp.textContent = `Revealed on ${formatStamp()}`;
           revealStamp.classList.add('show');
+          
+          // ADDED: This triggers the fade-out animation
+          scratchCanvas.classList.add('cleared');
         }
       }, 200);
 
